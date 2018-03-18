@@ -67,22 +67,24 @@ class Human: public Creature
     const int base_defence;
 };
 
-// Рыцари. Могут иметь меч в качестве оружия и лошадь в качестве ездового животного.
+// Рыцари. Могут иметь меч в качестве оружия, латы в качвестве брони и лошадь в качестве ездового животного.
 class Knight: public Human
 {
-    Sword *sword;
+    Sword *weapon;
+    Plate *armor;
     Horse *mount;
 }
 
-// Лучники. Могут иметь лук в качестве оружия.
+// Лучники. Могут иметь лук в качестве оружия и кольчугу в качестве брони.
 class Archer: public Human
 {
-    Bow *bow;
+    ChainArmor *armor;
+    Bow *weapon;
 }
 
 // Крестьяне. Могут иметь кирку в качестве оружия и свиней в качестве домашнего скота.
 class Peasant: public Human
 {
-    Pickaxe *pickaxe;
+    Pickaxe *weapon;
     Pig *livestock;
 }
