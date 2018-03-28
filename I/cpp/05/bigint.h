@@ -17,6 +17,7 @@ class BigInt
 public:
     BigInt(int num = 0);
     BigInt(const BigInt &other);
+    ~BigInt() { delete[] arr; }
 
     BigInt &operator=(const BigInt &other);
     BigInt operator-() const;
@@ -95,13 +96,14 @@ BigInt operator*(const BigInt &first, const BigInt &second)
 {
     BigInt tmp = BigInt();
     BigInt shifted_tmp(first);
+    shifted_tmp.is_positive = true;
     for(size_t i = 0; i < second.cur_size; ++i) {
         BigInt loc_tmp(shifted_tmp);
         for(size_t j = i; j < loc_tmp.cur_size; ++j) loc_tmp.arr[j] *= second.arr[i];
         tmp = loc_tmp + tmp;
         shifted_tmp.shift();
     }
-    tmp.is_positive = first.is_positive ^ second.is_positive;
+    tmp.is_positive = !(first.is_positive ^ second.is_positive);
     return tmp;
 }
 
@@ -160,7 +162,34 @@ bool operator!=(const BigInt &first, const BigInt &second)
 
 BigInt operator/(const BigInt &first, const BigInt &second)
 {
-    return first - second;
+    if(first == 0) return BigInt(0);
+    BigInt a(first), b(second), c(0);
+    a.is_positive = true;
+    b.is_positive = true;
+    while(a >= b) {
+        BigInt tmp(b);
+        BigInt shifted_tmp(b);
+        while(shifted_tmp < a) {
+            tmp = shifted_tmp;
+            shifted_tmp.shift();
+        }
+        if(a.cur_size == tmp.cur_size) {
+            Number mult = a.arr[a.cur_size - 1] / tmp.arr[tmp.cur_size - 1];
+            if(a < tmp * mult) --mult;
+            a = a - tmp * mult;
+            c = c * BASE + mult;
+        } else {
+            int mult = (a.arr[a.cur_size - 1] * BASE + a.arr[a.cur_size - 2]) / tmp.arr[tmp.cur_size - 1];
+            if(a < tmp * mult) --mult;
+            a = a - tmp * mult;
+            a.normalize_dec(); // Why? Shouldn't be any problem here!!!!
+            // std::cout << "|" << mult << "|" << c << "|" << a << std::endl;
+            c = (c * BASE) + mult;
+            // std::cout << c << std::endl;
+        }
+    }
+    c.is_positive = !(first.is_positive ^ second.is_positive);
+    return c;
 }
 
 void BigInt::normalize_dec()

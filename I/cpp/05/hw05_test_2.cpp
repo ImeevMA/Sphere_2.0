@@ -117,11 +117,11 @@ int main()
     checkEqual(BigInt(99) - BigInt(100), "-1");
     checkEqual(BigInt(10) - BigInt(11), "-1");
     checkEqual(BigInt(20) - BigInt(19), "1");
-
     for (int i = -21; i <= 21; ++i)
     {
         for (int j = -21; j <= 21; ++j)
         {
+            // std::cout << i << "|" << j << std::endl;
             check(i, j);
         }
     }
