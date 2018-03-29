@@ -15,7 +15,7 @@ class BigInt
     void normalize_inc();
     void expansion(size_t delta = SIZE);
 public:
-    BigInt(int num = 0);
+    BigInt(int64_t num = 0);
     BigInt(const BigInt &other);
     ~BigInt() { delete[] arr; }
 
@@ -43,7 +43,7 @@ std::ostream& operator<<(std::ostream& out, const BigInt& value)
     }
 }
 
-BigInt::BigInt(int num)
+BigInt::BigInt(int64_t num)
 {
     arr = new Number[max_size]();
     if(num < 0) {
@@ -79,6 +79,7 @@ BigInt &BigInt::operator=(const BigInt &other)
 
 BigInt operator+(const BigInt &first, const BigInt &second)
 {
+    if(first.cur_size == 0 && second.cur_size == 0) return BigInt(0);
     if(first.is_positive != second.is_positive) return first - (-second);
     const BigInt *a = &first;
     const BigInt *b = &second;
@@ -94,6 +95,7 @@ BigInt operator+(const BigInt &first, const BigInt &second)
 
 BigInt operator*(const BigInt &first, const BigInt &second)
 {
+    if(first.cur_size == 0 || second.cur_size == 0) return BigInt(0);
     BigInt tmp = BigInt();
     BigInt shifted_tmp(first);
     shifted_tmp.is_positive = true;
@@ -116,6 +118,7 @@ BigInt BigInt::operator-() const
 
 BigInt operator-(const BigInt &first, const BigInt &second)
 {
+    if(first.cur_size == 0 && second.cur_size == 0) return BigInt(0);
     if(first.is_positive != second.is_positive) return first + (-second);
     if(first.cur_size > second.cur_size) {
         BigInt tmp(first);
@@ -166,27 +169,23 @@ BigInt operator/(const BigInt &first, const BigInt &second)
     BigInt a(first), b(second), c(0);
     a.is_positive = true;
     b.is_positive = true;
+    a >= b;
     while(a >= b) {
         BigInt tmp(b);
         BigInt shifted_tmp(b);
-        while(shifted_tmp < a) {
+        BigInt tmp_c(1);
+        int i = 0;
+        shifted_tmp.shift();
+        while(a > shifted_tmp) {
             tmp = shifted_tmp;
+            tmp_c.shift();
             shifted_tmp.shift();
         }
-        if(a.cur_size == tmp.cur_size) {
-            Number mult = a.arr[a.cur_size - 1] / tmp.arr[tmp.cur_size - 1];
-            if(a < tmp * mult) --mult;
-            a = a - tmp * mult;
-            c = c * BASE + mult;
-        } else {
-            int mult = (a.arr[a.cur_size - 1] * BASE + a.arr[a.cur_size - 2]) / tmp.arr[tmp.cur_size - 1];
-            if(a < tmp * mult) --mult;
-            a = a - tmp * mult;
-            a.normalize_dec(); // Why? Shouldn't be any problem here!!!!
-            // std::cout << "|" << mult << "|" << c << "|" << a << std::endl;
-            c = (c * BASE) + mult;
-            // std::cout << c << std::endl;
+        while(a >= tmp) {
+            a = a - tmp;
+            ++i;
         }
+        c = c + tmp_c * i;
     }
     c.is_positive = !(first.is_positive ^ second.is_positive);
     return c;
@@ -212,18 +211,15 @@ void BigInt::normalize_dec()
 
 void BigInt::normalize_inc()
 {
-    for(size_t i = 1; i < cur_size; ++i)
-    {
+    int i = 1;
+    while(i <= cur_size) {
+        if(cur_size == max_size) expansion();
         if(arr[i - 1] >= BASE) {
             arr[i] += arr[i - 1] / BASE;
-            arr[i - 1] %= BASE;
+            arr[i - 1] = arr[i - 1] % BASE;
         }
-    }
-    if(cur_size == max_size && arr[cur_size - 1] >= BASE) {
-        expansion();
-        arr[cur_size] += arr[cur_size - 1] / BASE;
-        arr[cur_size] %= BASE;
-        ++cur_size;
+        if(arr[cur_size] > 0) ++cur_size;
+        ++i;
     }
 }
 

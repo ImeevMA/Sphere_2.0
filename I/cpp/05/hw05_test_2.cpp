@@ -33,6 +33,9 @@ void check(int64_t x, int64_t y)
 
     if (x != 0 && y != 0)
     {
+        // std::cout << "|" << x << "|" << y << std::endl;
+        BigInt(0) - BigInt(0);
+        // std::cout << "|" << std::endl;
         if (bigX / bigY != BigInt(x / y))
         {
             std::cout << x << " / " << y << " != " << x / y << " got " << bigX / bigY << '\n';
@@ -121,22 +124,21 @@ int main()
     {
         for (int j = -21; j <= 21; ++j)
         {
-            // std::cout << i << "|" << j << std::endl;
             check(i, j);
         }
     }
 
-    // const int64_t step = std::numeric_limits<uint32_t>::max() / 99;
-    // const int64_t lower = std::numeric_limits<int32_t>::min() + step;
-    // const int64_t upper = std::numeric_limits<int32_t>::max() - step;
+    const int64_t step = std::numeric_limits<uint32_t>::max() / 99;
+    const int64_t lower = std::numeric_limits<int32_t>::min() + step;
+    const int64_t upper = std::numeric_limits<int32_t>::max() - step;
 
-    // for (int64_t i = lower; i < upper; i += step)
-    // {
-    //     for (int64_t j = -99; j < 99; ++j)
-    //     {
-    //         check(i, j);
-    //     }
-    // }
+    for (int64_t i = lower; i < upper; i += step)
+    {
+        for (int64_t j = -99; j < 99; ++j)
+        {
+            check(i, j);
+        }
+    }
 
     return 0;
 }
