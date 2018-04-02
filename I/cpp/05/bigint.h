@@ -1,10 +1,10 @@
-using Number = signed char;
-
-constexpr Number BASE = 10;
-constexpr size_t SIZE = 32;
-
 class BigInt
 {
+    using Number = signed char;
+
+    static constexpr Number BASE = 10;
+    static constexpr size_t SIZE = 32;
+
     Number *arr = nullptr;
     size_t max_size = SIZE;
     size_t cur_size = 0;
@@ -22,12 +22,13 @@ public:
 
     BigInt &operator=(const BigInt &other);
     BigInt &operator=(BigInt &&other);
-    BigInt operator-() const;
 
     BigInt operator+(const BigInt &other) const;
     BigInt operator-(const BigInt &other) const;
     BigInt operator*(const BigInt &other) const;
     BigInt operator/(const BigInt &other) const;
+    BigInt operator-() const;
+
     bool operator>(const BigInt &other) const;
     bool operator<(const BigInt &other) const;
     bool operator>=(const BigInt &other) const;
