@@ -24,14 +24,17 @@ public:
     BigInt &operator=(BigInt &&other);
     BigInt operator-() const;
 
-    friend BigInt operator+(const BigInt &first, const BigInt &second);
-    friend BigInt operator-(const BigInt &first, const BigInt &second);
-    friend BigInt operator*(const BigInt &first, const BigInt &second);
-    friend BigInt operator/(const BigInt &first, const BigInt &second);
-    friend bool operator>(const BigInt &first, const BigInt &second);
-    friend bool operator<(const BigInt &first, const BigInt &second);
-    friend bool operator==(const BigInt &first, const BigInt &second);
-    friend bool operator!=(const BigInt &first, const BigInt &second);
+    BigInt operator+(const BigInt &other) const;
+    BigInt operator-(const BigInt &other) const;
+    BigInt operator*(const BigInt &other) const;
+    BigInt operator/(const BigInt &other) const;
+    bool operator>(const BigInt &other) const;
+    bool operator<(const BigInt &other) const;
+    bool operator>=(const BigInt &other) const;
+    bool operator<=(const BigInt &other) const;
+    bool operator==(const BigInt &other) const;
+    bool operator!=(const BigInt &other) const;
+
     friend std::ostream& operator<<(std::ostream& out, const BigInt& value);
 };
 
@@ -100,15 +103,15 @@ BigInt &BigInt::operator=(BigInt &&other)
     return *this;
 }
 
-BigInt operator+(const BigInt &first, const BigInt &second)
+BigInt BigInt::operator+(const BigInt &other) const
 {
-    if(first.cur_size == 0 && second.cur_size == 0) return BigInt(0);
-    if(first.is_positive != second.is_positive) return first - (-second);
-    const BigInt *a = &first;
-    const BigInt *b = &second;
-    if(second.cur_size > first.cur_size) {
-        a = &second;
-        b = &first;
+    if(cur_size == 0 && other.cur_size == 0) return BigInt(0);
+    if(is_positive != other.is_positive) return *this - (-other);
+    const BigInt *a = &*this;
+    const BigInt *b = &other;
+    if(other.cur_size > cur_size) {
+        a = &other;
+        b = &*this;
     }
     BigInt tmp(*a);
     for(size_t i = 0; i < b->cur_size; ++i) tmp.arr[i] += b->arr[i];
@@ -116,19 +119,19 @@ BigInt operator+(const BigInt &first, const BigInt &second)
     return tmp;
 }
 
-BigInt operator*(const BigInt &first, const BigInt &second)
+BigInt BigInt::operator*(const BigInt &other) const
 {
-    if(first.cur_size == 0 || second.cur_size == 0) return BigInt(0);
+    if(cur_size == 0 || other.cur_size == 0) return BigInt(0);
     BigInt tmp = BigInt();
-    BigInt shifted_tmp(first);
+    BigInt shifted_tmp(*this);
     shifted_tmp.is_positive = true;
-    for(size_t i = 0; i < second.cur_size; ++i) {
+    for(size_t i = 0; i < other.cur_size; ++i) {
         BigInt loc_tmp(shifted_tmp);
-        for(size_t j = i; j < loc_tmp.cur_size; ++j) loc_tmp.arr[j] *= second.arr[i];
+        for(size_t j = i; j < loc_tmp.cur_size; ++j) loc_tmp.arr[j] *= other.arr[i];
         tmp = loc_tmp + tmp;
         shifted_tmp.shift();
     }
-    tmp.is_positive = !(first.is_positive ^ second.is_positive);
+    tmp.is_positive = !(is_positive ^ other.is_positive);
     return tmp;
 }
 
@@ -139,57 +142,57 @@ BigInt BigInt::operator-() const
     return tmp;
 }
 
-BigInt operator-(const BigInt &first, const BigInt &second)
+BigInt BigInt::operator-(const BigInt &other) const
 {
-    if(first.cur_size == 0 && second.cur_size == 0) return BigInt(0);
-    if(first.is_positive != second.is_positive) return first + (-second);
-    if(first.cur_size > second.cur_size) {
-        BigInt tmp(first);
-        for(size_t i = 0; i < second.cur_size; ++i) tmp.arr[i] -= second.arr[i];
+    if(cur_size == 0 && other.cur_size == 0) return BigInt(0);
+    if(is_positive != other.is_positive) return *this + (-other);
+    if(cur_size > other.cur_size) {
+        BigInt tmp(*this);
+        for(size_t i = 0; i < other.cur_size; ++i) tmp.arr[i] -= other.arr[i];
         tmp.normalize_dec();
         return tmp;
     }
-    BigInt tmp(second);
-    for(size_t i = 0; i < second.cur_size; ++i) tmp.arr[i] = -tmp.arr[i];
-    for(size_t i = 0; i < first.cur_size; ++i) tmp.arr[i] += first.arr[i];
+    BigInt tmp(other);
+    for(size_t i = 0; i < other.cur_size; ++i) tmp.arr[i] = -tmp.arr[i];
+    for(size_t i = 0; i < cur_size; ++i) tmp.arr[i] += arr[i];
     tmp.normalize_dec();
     return tmp;
 }
 
-bool operator<(const BigInt &first, const BigInt &second)
+bool BigInt::operator<(const BigInt &other) const
 {
-    return (first != second) && (second - first).is_positive;
+    return (*this != other) && (other - *this).is_positive;
 }
 
-bool operator<=(const BigInt &first, const BigInt &second)
+bool BigInt::operator<=(const BigInt &other) const
 {
-    return (first < second) || (first == second);
+    return (*this < other) || (*this == other);
 }
 
-bool operator>=(const BigInt &first, const BigInt &second)
+bool BigInt::operator>=(const BigInt &other) const
 {
-    return (first > second) || (first == second);
+    return (*this > other) || (*this == other);
 }
 
-bool operator>(const BigInt &first, const BigInt &second)
+bool BigInt::operator>(const BigInt &other) const
 {
-    return (first != second) && (first - second).is_positive;
+    return (*this != other) && (*this - other).is_positive;
 }
 
-bool operator==(const BigInt &first, const BigInt &second)
+bool BigInt::operator==(const BigInt &other) const
 {
-    return !((first - second).cur_size);
+    return !((*this - other).cur_size);
 }
 
-bool operator!=(const BigInt &first, const BigInt &second)
+bool BigInt::operator!=(const BigInt &other) const
 {
-    return !(first == second);
+    return !(*this == other);
 }
 
-BigInt operator/(const BigInt &first, const BigInt &second)
+BigInt BigInt::operator/(const BigInt &other) const
 {
-    if(first == 0) return BigInt(0);
-    BigInt a(first), b(second), c(0);
+    if(*this == 0) return BigInt(0);
+    BigInt a(*this), b(other), c(0);
     a.is_positive = true;
     b.is_positive = true;
     a >= b;
@@ -210,7 +213,7 @@ BigInt operator/(const BigInt &first, const BigInt &second)
         }
         c = c + tmp_c * i;
     }
-    c.is_positive = !(first.is_positive ^ second.is_positive);
+    c.is_positive = !(is_positive ^ other.is_positive);
     return c;
 }
 
