@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include <map>
 
 void word_counter(const std::string &fname);
@@ -37,12 +38,12 @@ void word_counter(const std::string &fname)
             counter[word] = 1;
         }
     }
-    auto comparator =
-        [](std::pair<std::string, int> x, std::pair<std::string, int> x)
-        {
-            return x.second < y.second;
-        }
-
-    std::set<std::pair<std::string, int>, 
-    std::sort(counter.begin(), counter.end(), counter.value_comp());
+    std::vector<std::pair<int, std::string>> res;
+    for(auto &elem : counter) {
+        res.emplace_back(elem.second, elem.first);
+    }
+    std::sort(res.begin(), res.end(), std::greater<std::pair<int, std::string>>());
+    for(auto &elem : res) {
+        std::cout << elem.first << ": " << elem.second << std::endl;
+    }
 }
